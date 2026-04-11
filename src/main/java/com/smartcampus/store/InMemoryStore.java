@@ -54,4 +54,12 @@ public class InMemoryStore {
     public Sensor getSensorById(String id) {
         return sensors.get(id);
     }
+
+    public boolean sensorExists(String id) {
+        return sensors.containsKey(id);
+    }
+
+    public void addSensor(Sensor sensor) {
+        sensors.put(sensor.getId(), sensor);
+    }
 }
