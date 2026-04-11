@@ -45,21 +45,5 @@ public class InMemoryStore {
         return rooms.remove(id) != null;
     }
 
-    // --- Sensor operations ---
-
-    public Collection<Sensor> getAllSensors() {
-        return sensors.values();
-    }
-
-    public Sensor getSensorById(String id) {
-        return sensors.get(id);
-    }
-
-    public boolean sensorExists(String id) {
-        return sensors.containsKey(id);
-    }
-
-    public void addSensor(Sensor sensor) {
-        sensors.put(sensor.getId(), sensor);
-    }
+    // --- Sensor operations (read/write methods to follow) ---
 }
