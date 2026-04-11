@@ -1,6 +1,7 @@
 package com.smartcampus.resource;
 
 import com.smartcampus.exception.LinkedResourceNotFoundException;
+import com.smartcampus.model.Room;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.store.InMemoryStore;
 
@@ -41,6 +42,10 @@ public class SensorResource {
 
         store.addSensor(sensor);
 
+        // Link the sensor ID into the room's sensorIds list
+        Room room = store.getRoomById(sensor.getRoomId());
+        room.getSensorIds().add(sensor.getId());
+
         URI location = uriInfo.getAbsolutePathBuilder()
                 .path(sensor.getId())
                 .build();
@@ -71,6 +76,10 @@ public class SensorResource {
     // Helpers
     // -------------------------------------------------------------------------
 
+    /**
+     * Validates all required Sensor fields.
+     * Returns an error message, or null if validation passes.
+     */
     private String validateSensor(Sensor sensor) {
         if (sensor == null) {
             return "Request body is required.";
@@ -90,6 +99,9 @@ public class SensorResource {
         return null;
     }
 
+    /**
+     * Builds a consistent JSON error response.
+     */
     private Response buildError(Response.Status status, String error, String message) {
         Map<String, String> body = new HashMap<>();
         body.put("error", error);
