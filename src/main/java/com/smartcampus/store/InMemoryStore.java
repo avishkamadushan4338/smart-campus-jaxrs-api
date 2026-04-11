@@ -45,5 +45,13 @@ public class InMemoryStore {
         return rooms.remove(id) != null;
     }
 
-    // --- Sensor operations (read/write methods to follow) ---
+    // --- Sensor operations ---
+
+    public Collection<Sensor> getAllSensors() {
+        return sensors.values();
+    }
+
+    public Sensor getSensorById(String id) {
+        return sensors.get(id);
+    }
 }
