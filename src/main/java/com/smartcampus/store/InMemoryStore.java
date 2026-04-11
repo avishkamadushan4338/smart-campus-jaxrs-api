@@ -1,6 +1,7 @@
 package com.smartcampus.store;
 
 import com.smartcampus.model.Room;
+import com.smartcampus.model.Sensor;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +14,8 @@ public class InMemoryStore {
 
     private static final InMemoryStore INSTANCE = new InMemoryStore();
 
-    private final ConcurrentHashMap<String, Room> rooms = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Room>   rooms   = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Sensor> sensors = new ConcurrentHashMap<>();
 
     private InMemoryStore() {}
 
@@ -42,4 +44,6 @@ public class InMemoryStore {
     public boolean deleteRoom(String id) {
         return rooms.remove(id) != null;
     }
+
+    // --- Sensor operations (read/write methods to follow) ---
 }
