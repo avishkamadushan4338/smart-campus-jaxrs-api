@@ -7,8 +7,11 @@ import com.smartcampus.store.InMemoryStore;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Path("/sensors")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,6 +46,25 @@ public class SensorResource {
                 .build();
 
         return Response.created(location).entity(sensor).build();
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /api/v1/sensors          —  List all sensors
+    // GET /api/v1/sensors?type=CO2 —  Filter sensors by type (case-insensitive)
+    // -------------------------------------------------------------------------
+    @GET
+    public Response getSensors(@QueryParam("type") String type) {
+        Collection<Sensor> all = store.getAllSensors();
+
+        if (type == null || type.trim().isEmpty()) {
+            return Response.ok(all).build();
+        }
+
+        List<Sensor> filtered = all.stream()
+                .filter(s -> s.getType().equalsIgnoreCase(type.trim()))
+                .collect(Collectors.toList());
+
+        return Response.ok(filtered).build();
     }
 
     // -------------------------------------------------------------------------
