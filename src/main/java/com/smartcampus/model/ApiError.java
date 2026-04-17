@@ -33,4 +33,13 @@ public class ApiError {
     public static ApiError of(int status, String error, String message) {
         return new ApiError(status, error, message, Instant.now().toString());
     }
+
+    /**
+     * Fluent builder for optional extra context fields.
+     * Returns {@code this} so calls can be chained.
+     */
+    public ApiError with(String key, Object value) {
+        extras.put(key, value);
+        return this;
+    }
 }
