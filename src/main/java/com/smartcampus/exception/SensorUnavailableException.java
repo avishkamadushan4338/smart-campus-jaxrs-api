@@ -14,4 +14,8 @@ public class SensorUnavailableException extends RuntimeException {
                 + "and cannot accept new readings.");
         this.sensorId = sensorId;
     }
+
+    public String getSensorId() {
+        return sensorId;
+    }
 }
