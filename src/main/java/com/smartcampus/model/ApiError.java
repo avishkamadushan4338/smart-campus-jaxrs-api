@@ -42,4 +42,24 @@ public class ApiError {
         extras.put(key, value);
         return this;
     }
+
+    // -----------------------------------------------------------------------
+    // Standard getters (serialised by Jackson in declaration order)
+    // -----------------------------------------------------------------------
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
 }
