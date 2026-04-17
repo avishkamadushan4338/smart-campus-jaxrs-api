@@ -21,4 +21,16 @@ public class ApiError {
 
     /** Holds optional extra fields flattened into the top-level JSON object. */
     private final Map<String, Object> extras = new LinkedHashMap<>();
+
+    public ApiError(int status, String error, String message, String timestamp) {
+        this.status    = status;
+        this.error     = error;
+        this.message   = message;
+        this.timestamp = timestamp;
+    }
+
+    /** Convenience factory — auto-generates the current UTC ISO-8601 timestamp. */
+    public static ApiError of(int status, String error, String message) {
+        return new ApiError(status, error, message, Instant.now().toString());
+    }
 }
