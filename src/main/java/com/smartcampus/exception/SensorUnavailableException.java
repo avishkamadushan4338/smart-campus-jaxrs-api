@@ -6,4 +6,12 @@ package com.smartcampus.exception;
  * SensorUnavailableExceptionMapper.
  */
 public class SensorUnavailableException extends RuntimeException {
+
+    private final String sensorId;
+
+    public SensorUnavailableException(String sensorId) {
+        super("Sensor '" + sensorId + "' is currently under maintenance "
+                + "and cannot accept new readings.");
+        this.sensorId = sensorId;
+    }
 }
