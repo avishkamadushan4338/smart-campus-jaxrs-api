@@ -10,7 +10,15 @@ import java.util.Map;
  * Standard JSON error envelope returned by all exception mappers.
  *
  * Core fields: status, error, message, timestamp.
- * Optional extra context fields are added via {@link #with(String, Object)}.
+ * Optional extra context fields (roomId, sensorId, linkedResourceType, etc.)
+ * are added via {@link #with(String, Object)} and serialised at the top level
+ * by Jackson's @JsonAnyGetter so they appear flat in the JSON body.
+ *
+ * Example usage:
+ * <pre>
+ *   ApiError.of(409, "Conflict", "Room still has sensors.")
+ *           .with("roomId", "room-101")
+ * </pre>
  */
 public class ApiError {
 
@@ -61,5 +69,14 @@ public class ApiError {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    /**
+     * Entries in {@code extras} are serialised as sibling top-level keys,
+     * not as a nested object.
+     */
+    @JsonAnyGetter
+    public Map<String, Object> getExtras() {
+        return extras;
     }
 }
