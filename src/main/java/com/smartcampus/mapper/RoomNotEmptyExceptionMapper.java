@@ -20,6 +20,15 @@ public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmpty
 
     @Override
     public Response toResponse(RoomNotEmptyException ex) {
-        return Response.status(Response.Status.CONFLICT).build();
+        ApiError body = ApiError.of(
+                Response.Status.CONFLICT.getStatusCode(),
+                "Conflict",
+                ex.getMessage()
+        ).with("roomId", ex.getRoomId());
+
+        return Response.status(Response.Status.CONFLICT)
+                .entity(body)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }
