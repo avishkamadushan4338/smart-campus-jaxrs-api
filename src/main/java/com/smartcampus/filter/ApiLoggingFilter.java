@@ -24,4 +24,15 @@ public class ApiLoggingFilter
 
     private static final Logger LOGGER =
             Logger.getLogger(ApiLoggingFilter.class.getName());
+
+    /**
+     * Invoked by Jersey before the request reaches any resource method.
+     * Logs the HTTP method and the full request URI.
+     */
+    @Override
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        LOGGER.info(String.format("[REQUEST]  %s %s",
+                requestContext.getMethod(),
+                requestContext.getUriInfo().getRequestUri()));
+    }
 }
