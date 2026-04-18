@@ -35,4 +35,17 @@ public class ApiLoggingFilter
                 requestContext.getMethod(),
                 requestContext.getUriInfo().getRequestUri()));
     }
+
+    /**
+     * Invoked by Jersey after the resource method has returned and the
+     * response is about to be written to the client.
+     * Logs the final HTTP status code.
+     */
+    @Override
+    public void filter(ContainerRequestContext requestContext,
+                       ContainerResponseContext responseContext) throws IOException {
+        LOGGER.info(String.format("[RESPONSE] %d %s",
+                responseContext.getStatus(),
+                responseContext.getStatusInfo().getReasonPhrase()));
+    }
 }
