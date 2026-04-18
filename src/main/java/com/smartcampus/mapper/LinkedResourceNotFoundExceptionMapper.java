@@ -7,8 +7,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Maps {@link LinkedResourceNotFoundException} to HTTP 422 Unprocessable Entity
@@ -28,13 +26,13 @@ public class LinkedResourceNotFoundExceptionMapper
 
     @Override
     public Response toResponse(LinkedResourceNotFoundException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("error", "Not Found");
-        body.put("message", ex.getMessage());
-        body.put("linkedResourceType", ex.getResourceType());
-        body.put("linkedResourceId", ex.getResourceId());
+        ApiError body = ApiError.of(
+                UNPROCESSABLE_ENTITY,
+                "Unprocessable Entity",
+                ex.getMessage()
+        );
 
-        return Response.status(Response.Status.NOT_FOUND)
+        return Response.status(UNPROCESSABLE_ENTITY)
                 .entity(body)
                 .type(MediaType.APPLICATION_JSON)
                 .build();
