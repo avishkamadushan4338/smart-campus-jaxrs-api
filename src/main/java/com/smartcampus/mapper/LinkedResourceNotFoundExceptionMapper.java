@@ -1,6 +1,7 @@
 package com.smartcampus.mapper;
 
 import com.smartcampus.exception.LinkedResourceNotFoundException;
+import com.smartcampus.model.ApiError;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
