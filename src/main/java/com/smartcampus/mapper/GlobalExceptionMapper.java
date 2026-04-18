@@ -25,6 +25,23 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable ex) {
+
+        // WebApplicationExceptions already carry an intended HTTP status.
+        if (ex instanceof WebApplicationException) {
+            Response original = ((WebApplicationException) ex).getResponse();
+            if (original.getMediaType() != null
+                    && original.getMediaType().isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+                return original;
+            }
+            int code = original.getStatus();
+            String phrase = original.getStatusInfo().getReasonPhrase();
+            ApiError body = ApiError.of(code, phrase, ex.getMessage());
+            return Response.status(code)
+                    .entity(body)
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 }
