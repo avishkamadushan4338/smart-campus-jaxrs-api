@@ -30,7 +30,8 @@ public class LinkedResourceNotFoundExceptionMapper
                 UNPROCESSABLE_ENTITY,
                 "Unprocessable Entity",
                 ex.getMessage()
-        );
+        ).with("linkedResourceType", ex.getResourceType())
+         .with("linkedResourceId",   ex.getResourceId());
 
         return Response.status(UNPROCESSABLE_ENTITY)
                 .entity(body)
