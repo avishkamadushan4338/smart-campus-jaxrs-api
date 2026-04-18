@@ -21,6 +21,15 @@ public class SensorUnavailableExceptionMapper
 
     @Override
     public Response toResponse(SensorUnavailableException ex) {
-        return Response.status(Response.Status.FORBIDDEN).build();
+        ApiError body = ApiError.of(
+                Response.Status.FORBIDDEN.getStatusCode(),
+                "Forbidden",
+                ex.getMessage()
+        ).with("sensorId", ex.getSensorId());
+
+        return Response.status(Response.Status.FORBIDDEN)
+                .entity(body)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }
