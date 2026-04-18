@@ -11,12 +11,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Maps LinkedResourceNotFoundException to HTTP 404 Not Found with a JSON body.
- * Jersey discovers this automatically via @Provider and package scanning.
+ * Maps {@link LinkedResourceNotFoundException} to HTTP 422 Unprocessable Entity
+ * with a structured JSON body.
+ *
+ * Scenario: a client submits a syntactically valid JSON payload for a new
+ * Sensor, but the referenced {@code roomId} does not exist in the store.
+ * HTTP 422 is semantically correct here because the request was well-formed
+ * but could not be processed due to a failed domain constraint.
  */
 @Provider
 public class LinkedResourceNotFoundExceptionMapper
         implements ExceptionMapper<LinkedResourceNotFoundException> {
+
+    // 422 Unprocessable Entity — available in JAX-RS 2.1 / Jersey 2.x
+    private static final int UNPROCESSABLE_ENTITY = 422;
 
     @Override
     public Response toResponse(LinkedResourceNotFoundException ex) {
