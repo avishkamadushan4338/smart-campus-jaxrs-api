@@ -43,9 +43,13 @@ public class SensorReadingResource {
             throw new SensorUnavailableException(sensorId);
         }
 
-        // Auto-generate id if missing
         if (reading.getId() == null || reading.getId().trim().isEmpty()) {
             reading.setId(UUID.randomUUID().toString());
+        }
+
+        // Use current system time if timestamp is absent or invalid
+        if (reading.getTimestamp() <= 0) {
+            reading.setTimestamp(System.currentTimeMillis());
         }
 
         return Response.status(Response.Status.CREATED).build();
