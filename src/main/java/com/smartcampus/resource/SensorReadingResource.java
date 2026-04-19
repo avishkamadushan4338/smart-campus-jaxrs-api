@@ -31,20 +31,12 @@ public class SensorReadingResource {
         this.sensorId = sensorId;
     }
 
-    // -------------------------------------------------------------------------
-    // GET /api/v1/sensors/{sensorId}/readings
-    // Returns the full reading history for this sensor (empty array if none yet).
-    // -------------------------------------------------------------------------
     @GET
     public Response getReadings() {
         List<SensorReading> readings = store.getReadingsForSensor(sensorId);
         return Response.ok(readings).build();
     }
 
-    // -------------------------------------------------------------------------
-    // POST /api/v1/sensors/{sensorId}/readings
-    // Appends a new reading and updates the parent sensor's currentValue.
-    // -------------------------------------------------------------------------
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addReading(SensorReading reading, @Context UriInfo uriInfo) {
@@ -52,6 +44,14 @@ public class SensorReadingResource {
         if (validationError != null) {
             return buildError(Response.Status.BAD_REQUEST, "Bad Request", validationError);
         }
+
+        // Reject readings for sensors that are under maintenance.
+        Sensor parentSensor = store.getSensorById(sensorId);
+        if (parentSensor != null
+                && "MAINTENANCE".equalsIgnoreCase(parentSensor.getStatus())) {
+            throw new SensorUnavailableException(sensorId);
+        }
+
         return Response.status(Response.Status.CREATED).build();
     }
 
