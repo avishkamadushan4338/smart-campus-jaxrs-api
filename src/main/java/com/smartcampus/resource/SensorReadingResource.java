@@ -13,14 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Sub-resource that handles all reading operations scoped to one specific sensor.
- * Reached via the sub-resource locator in SensorResource:
- *   GET  /api/v1/sensors/{sensorId}/readings
- *   POST /api/v1/sensors/{sensorId}/readings
- *
- * No @Path at the class level — the path is fully resolved by the locator.
- */
 @Produces(MediaType.APPLICATION_JSON)
 public class SensorReadingResource {
 
@@ -45,11 +37,15 @@ public class SensorReadingResource {
             return buildError(Response.Status.BAD_REQUEST, "Bad Request", validationError);
         }
 
-        // Reject readings for sensors that are under maintenance.
         Sensor parentSensor = store.getSensorById(sensorId);
         if (parentSensor != null
                 && "MAINTENANCE".equalsIgnoreCase(parentSensor.getStatus())) {
             throw new SensorUnavailableException(sensorId);
+        }
+
+        // Auto-generate id if missing
+        if (reading.getId() == null || reading.getId().trim().isEmpty()) {
+            reading.setId(UUID.randomUUID().toString());
         }
 
         return Response.status(Response.Status.CREATED).build();
