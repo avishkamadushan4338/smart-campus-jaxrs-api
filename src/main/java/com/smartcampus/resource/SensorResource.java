@@ -68,6 +68,15 @@ public class SensorResource {
     }
 
     // -------------------------------------------------------------------------
+    // Sub-resource locator: delegates /sensors/{sensorId}/readings to
+    // SensorReadingResource.  No HTTP method annotation = locator, not handler.
+    // -------------------------------------------------------------------------
+    @Path("/{sensorId}/readings")
+    public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
+        return new SensorReadingResource(sensorId);
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
