@@ -73,6 +73,11 @@ public class SensorResource {
     // -------------------------------------------------------------------------
     @Path("/{sensorId}/readings")
     public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
+        if (!store.sensorExists(sensorId)) {
+            throw new WebApplicationException(
+                    buildError(Response.Status.NOT_FOUND, "Not Found",
+                            "Sensor with ID '" + sensorId + "' was not found."));
+        }
         return new SensorReadingResource(sensorId);
     }
 
