@@ -47,12 +47,18 @@ public class SensorReadingResource {
             reading.setId(UUID.randomUUID().toString());
         }
 
-        // Use current system time if timestamp is absent or invalid
         if (reading.getTimestamp() <= 0) {
             reading.setTimestamp(System.currentTimeMillis());
         }
 
-        return Response.status(Response.Status.CREATED).build();
+        store.addReading(sensorId, reading);
+
+        // Keep the parent sensor's currentValue in sync with the latest reading
+        if (parentSensor != null) {
+            parentSensor.setCurrentValue(reading.getValue());
+        }
+
+        return Response.status(Response.Status.CREATED).entity(reading).build();
     }
 
     private String validateReading(SensorReading reading) {
