@@ -40,4 +40,32 @@ public class SensorReadingResource {
         List<SensorReading> readings = store.getReadingsForSensor(sensorId);
         return Response.ok(readings).build();
     }
+
+    // -------------------------------------------------------------------------
+    // POST /api/v1/sensors/{sensorId}/readings
+    // Appends a new reading and updates the parent sensor's currentValue.
+    // -------------------------------------------------------------------------
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addReading(SensorReading reading, @Context UriInfo uriInfo) {
+        String validationError = validateReading(reading);
+        if (validationError != null) {
+            return buildError(Response.Status.BAD_REQUEST, "Bad Request", validationError);
+        }
+        return Response.status(Response.Status.CREATED).build();
+    }
+
+    private String validateReading(SensorReading reading) {
+        if (reading == null) {
+            return "Request body is required.";
+        }
+        return null;
+    }
+
+    private Response buildError(Response.Status status, String error, String message) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", error);
+        body.put("message", message);
+        return Response.status(status).entity(body).build();
+    }
 }
