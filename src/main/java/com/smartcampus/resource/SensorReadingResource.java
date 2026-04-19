@@ -30,4 +30,14 @@ public class SensorReadingResource {
     public SensorReadingResource(String sensorId) {
         this.sensorId = sensorId;
     }
+
+    // -------------------------------------------------------------------------
+    // GET /api/v1/sensors/{sensorId}/readings
+    // Returns the full reading history for this sensor (empty array if none yet).
+    // -------------------------------------------------------------------------
+    @GET
+    public Response getReadings() {
+        List<SensorReading> readings = store.getReadingsForSensor(sensorId);
+        return Response.ok(readings).build();
+    }
 }
