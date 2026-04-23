@@ -1,6 +1,8 @@
 package com.smartcampus.resource;
 
 import com.smartcampus.exception.LinkedResourceNotFoundException;
+import com.smartcampus.model.ApiError;
+import com.smartcampus.model.Room;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.store.InMemoryStore;
 
@@ -8,9 +10,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Path("/sensors")
@@ -41,6 +41,14 @@ public class SensorResource {
 
         store.addSensor(sensor);
 
+        // Keep the parent room's sensorIds list consistent with the new sensor.
+        // Required so GET /rooms/{id} reflects correct sensorIds and
+        // DELETE /rooms/{id} correctly blocks deletion when sensors are present.
+        Room room = store.getRoomById(sensor.getRoomId());
+        if (room != null) {
+            room.getSensorIds().add(sensor.getId());
+        }
+
         URI location = uriInfo.getAbsolutePathBuilder()
                 .path(sensor.getId())
                 .build();
@@ -65,6 +73,21 @@ public class SensorResource {
                 .collect(Collectors.toList());
 
         return Response.ok(filtered).build();
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /api/v1/sensors/{sensorId}  —  Get a single sensor by ID
+    // The POST /sensors Location header points here, so this endpoint must exist.
+    // -------------------------------------------------------------------------
+    @GET
+    @Path("/{sensorId}")
+    public Response getSensorById(@PathParam("sensorId") String sensorId) {
+        Sensor sensor = store.getSensorById(sensorId);
+        if (sensor == null) {
+            return buildError(Response.Status.NOT_FOUND, "Not Found",
+                    "Sensor with ID '" + sensorId + "' was not found.");
+        }
+        return Response.ok(sensor).build();
     }
 
     // -------------------------------------------------------------------------
@@ -105,9 +128,10 @@ public class SensorResource {
     }
 
     private Response buildError(Response.Status status, String error, String message) {
-        Map<String, String> body = new HashMap<>();
-        body.put("error", error);
-        body.put("message", message);
-        return Response.status(status).entity(body).build();
+        ApiError body = ApiError.of(status.getStatusCode(), error, message);
+        return Response.status(status)
+                .entity(body)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }
