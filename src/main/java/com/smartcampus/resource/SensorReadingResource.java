@@ -9,21 +9,25 @@ import com.smartcampus.store.InMemoryStore;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Sub-resource that handles all reading operations scoped to one specific sensor.
- * Reached via the sub-resource locator in SensorResource:
- *   GET  /api/v1/sensors/{sensorId}/readings
- *   POST /api/v1/sensors/{sensorId}/readings
+ * Reached via the sub-resource locator in {@link SensorResource}:
  *
- * No @Path at the class level — the path is fully resolved by the locator.
+ *   GET  /api/v1/sensors/{sensorId}/readings  — list all readings for this sensor
+ *   POST /api/v1/sensors/{sensorId}/readings  — record a new reading
+ *
+ * This class has no class-level {@code @Path} annotation — the full path is
+ * resolved by the locator method in SensorResource, which also performs the
+ * 404 guard before this class is ever instantiated.
  */
 @Produces(MediaType.APPLICATION_JSON)
 public class SensorReadingResource {
 
-    private final String sensorId;
+    private final String        sensorId;
     private final InMemoryStore store = InMemoryStore.getInstance();
 
     public SensorReadingResource(String sensorId) {
@@ -42,36 +46,39 @@ public class SensorReadingResource {
 
     // -------------------------------------------------------------------------
     // POST /api/v1/sensors/{sensorId}/readings
-    // Appends a new reading and updates the parent sensor's currentValue.
+    // Validates, defaults missing fields, persists, and updates currentValue.
     // -------------------------------------------------------------------------
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addReading(SensorReading reading, @Context UriInfo uriInfo) {
+
         String validationError = validateReading(reading);
         if (validationError != null) {
             return buildError(Response.Status.BAD_REQUEST, "Bad Request", validationError);
         }
 
-        // Reject readings for sensors that are under maintenance.
+        // Reject readings for sensors that are under maintenance (403 Forbidden).
         Sensor parentSensor = store.getSensorById(sensorId);
         if (parentSensor != null
                 && "MAINTENANCE".equalsIgnoreCase(parentSensor.getStatus())) {
             throw new SensorUnavailableException(sensorId);
         }
 
-        // Auto-generate id if missing
+        // Auto-generate a unique ID if the client did not supply one.
         if (reading.getId() == null || reading.getId().trim().isEmpty()) {
             reading.setId(UUID.randomUUID().toString());
         }
 
-        // Use current system time if timestamp is absent or invalid
-        if (reading.getTimestamp() <= 0) {
-            reading.setTimestamp(System.currentTimeMillis());
+        // Default timestamp to current UTC instant if absent or blank.
+        // Stored as ISO-8601 string (e.g. "2026-04-23T10:15:30.123456789Z").
+        if (reading.getTimestamp() == null || reading.getTimestamp().trim().isEmpty()) {
+            reading.setTimestamp(Instant.now().toString());
         }
 
         store.addReading(sensorId, reading);
 
-        // Keep the parent sensor's currentValue in sync with the latest reading
+        // Keep the parent sensor's currentValue in sync with the latest reading.
+        // This ensures GET /sensors/{id} always reflects the most recent measurement.
         if (parentSensor != null) {
             parentSensor.setCurrentValue(reading.getValue());
         }
@@ -91,8 +98,8 @@ public class SensorReadingResource {
         if (reading == null) {
             return "Request body is required.";
         }
-        // 'value' is a primitive double — Jackson deserializes it to 0.0 if
-        // the field is absent, which is a valid sensor value, so no extra check.
+        // 'value' is a primitive double — Jackson defaults it to 0.0 if absent,
+        // which is a legitimate sensor reading, so no extra null check is needed.
         return null;
     }
 
