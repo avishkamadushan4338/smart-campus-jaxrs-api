@@ -1,0 +1,41 @@
+package com.smartcampus.mapper;
+
+import com.smartcampus.exception.LinkedResourceNotFoundException;
+import com.smartcampus.model.ApiError;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+/**
+ * Maps {@link LinkedResourceNotFoundException} to HTTP 422 Unprocessable Entity
+ * with a structured JSON body.
+ *
+ * Scenario: a client submits a syntactically valid JSON payload for a new
+ * Sensor, but the referenced {@code roomId} does not exist in the store.
+ * HTTP 422 is semantically correct here because the request was well-formed
+ * but could not be processed due to a failed domain constraint.
+ */
+@Provider
+public class LinkedResourceNotFoundExceptionMapper
+        implements ExceptionMapper<LinkedResourceNotFoundException> {
+
+    // 422 Unprocessable Entity — available in JAX-RS 2.1 / Jersey 2.x
+    private static final int UNPROCESSABLE_ENTITY = 422;
+
+    @Override
+    public Response toResponse(LinkedResourceNotFoundException ex) {
+        ApiError body = ApiError.of(
+                UNPROCESSABLE_ENTITY,
+                "Unprocessable Entity",
+                ex.getMessage()
+        ).with("linkedResourceType", ex.getResourceType())
+         .with("linkedResourceId",   ex.getResourceId());
+
+        return Response.status(UNPROCESSABLE_ENTITY)
+                .entity(body)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
+    }
+}
