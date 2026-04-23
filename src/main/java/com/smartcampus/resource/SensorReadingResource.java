@@ -1,6 +1,7 @@
 package com.smartcampus.resource;
 
 import com.smartcampus.exception.SensorUnavailableException;
+import com.smartcampus.model.ApiError;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.SensorReading;
 import com.smartcampus.store.InMemoryStore;
@@ -8,9 +9,7 @@ import com.smartcampus.store.InMemoryStore;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -98,9 +97,10 @@ public class SensorReadingResource {
     }
 
     private Response buildError(Response.Status status, String error, String message) {
-        Map<String, String> body = new HashMap<>();
-        body.put("error", error);
-        body.put("message", message);
-        return Response.status(status).entity(body).build();
+        ApiError body = ApiError.of(status.getStatusCode(), error, message);
+        return Response.status(status)
+                .entity(body)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }
