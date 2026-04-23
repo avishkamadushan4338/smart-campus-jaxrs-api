@@ -1,14 +1,16 @@
 package com.smartcampus.resource;
 
 import com.smartcampus.exception.RoomNotEmptyException;
+import com.smartcampus.model.ApiError;
 import com.smartcampus.model.Room;
 import com.smartcampus.store.InMemoryStore;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Path("/rooms")
@@ -42,9 +44,8 @@ public class RoomResource {
                     "A room with ID '" + room.getId() + "' already exists.");
         }
 
-        // Ensure sensorIds is never null when stored
         if (room.getSensorIds() == null) {
-            room.setSensorIds(new java.util.ArrayList<>());
+            room.setSensorIds(new ArrayList<>());
         }
 
         store.addRoom(room);
@@ -84,13 +85,12 @@ public class RoomResource {
         }
 
         if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
-            // Delegated to RoomNotEmptyExceptionMapper → HTTP 409 Conflict
             throw new RoomNotEmptyException(roomId);
         }
 
         store.deleteRoom(roomId);
 
-        Map<String, String> body = new HashMap<>();
+        Map<String, String> body = new LinkedHashMap<>();
         body.put("message", "Room '" + roomId + "' deleted successfully.");
         return Response.ok(body).build();
     }
@@ -99,10 +99,6 @@ public class RoomResource {
     // Helpers
     // -------------------------------------------------------------------------
 
-    /**
-     * Validates required Room fields.
-     * Returns an error message string, or null if validation passes.
-     */
     private String validateRoom(Room room) {
         if (room == null) {
             return "Request body is required.";
@@ -119,13 +115,11 @@ public class RoomResource {
         return null;
     }
 
-    /**
-     * Builds a consistent JSON error response.
-     */
     private Response buildError(Response.Status status, String error, String message) {
-        Map<String, String> body = new HashMap<>();
-        body.put("error", error);
-        body.put("message", message);
-        return Response.status(status).entity(body).build();
+        ApiError body = ApiError.of(status.getStatusCode(), error, message);
+        return Response.status(status)
+                .entity(body)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }
