@@ -8,10 +8,10 @@ import com.smartcampus.store.InMemoryStore;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ public class RoomResource {
         }
 
         if (room.getSensorIds() == null) {
-            room.setSensorIds(new ArrayList<>());
+            room.setSensorIds(new CopyOnWriteArrayList<>());
         }
 
         store.addRoom(room);
